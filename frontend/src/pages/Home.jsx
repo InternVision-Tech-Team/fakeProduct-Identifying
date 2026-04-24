@@ -35,7 +35,7 @@ export default function Home() {
           </h1>
           <p className="text-sky-100 text-lg md:text-xl max-w-2xl mx-auto mb-10">
             FakeDetect lets brands embed unique QR codes in their products and lets consumers
-            verify authenticity instantly — right from their mobile browser.
+            verify authenticity instantly right from their mobile browser.
           </p>
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link to="/scan"     className="btn-primary   text-base px-8 py-3 shadow-lg shadow-sky-900/40">
@@ -52,9 +52,9 @@ export default function Home() {
       <section className="bg-white border-y border-slate-100">
         <div className="max-w-4xl mx-auto px-6 py-8 grid grid-cols-1 sm:grid-cols-3 gap-4 text-center">
           {[
-            { icon: <CheckCircle2 className="text-emerald-500 mx-auto" size={32} />, label: 'VERIFIED', sub: 'First scan — Genuine product', bg: 'bg-emerald-50' },
-            { icon: <AlertTriangle className="text-amber-500  mx-auto" size={32} />, label: 'WARNING',  sub: 'Already scanned — Possible fake', bg: 'bg-amber-50' },
-            { icon: <XCircle      className="text-red-500    mx-auto" size={32} />, label: 'INVALID',  sub: 'Code not found — Counterfeit', bg: 'bg-red-50' },
+            { icon: <CheckCircle2 className="text-emerald-500 mx-auto" size={32} />, label: 'VERIFIED', sub: 'First scan -> Genuine product', bg: 'bg-emerald-50' },
+            { icon: <AlertTriangle className="text-amber-500  mx-auto" size={32} />, label: 'WARNING',  sub: 'Already scanned -> Possible fake', bg: 'bg-amber-50' },
+            { icon: <XCircle      className="text-red-500    mx-auto" size={32} />, label: 'INVALID',  sub: 'Code not found -> Counterfeit', bg: 'bg-red-50' },
           ].map(s => (
             <div key={s.label} className={`rounded-2xl p-5 ${s.bg}`}>
               {s.icon}
