@@ -32,3 +32,7 @@ services:
       - backend
     environment:
       - VITE_API_BASE_URL=http://backend:8000
+
+  app:
+    build: .
+    image: thetanishdewase1/fake_product_identifier:v1.0

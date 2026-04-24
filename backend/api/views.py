@@ -63,6 +63,18 @@ MOCK_PRODUCTS = {
         "category": "Electronics",
         "image_url": "https://placehold.co/300x300?text=Fitness+Band",
     },
+    "prod_005": {
+        "id": "prod_005",
+        "name": "Apple Watch",
+        "brand": "Apple",
+        "sku": "ST-WH-2024",
+        "batch_number": "BT20240409",
+        "manufacturing_date": "2024-03-01",
+        "expiry_date": "2027-03-01",
+        "description": "High-quality Mobile Phone.",
+        "category": "Electronics",
+        "image_url": "https://placehold.co/300x300?text=Apple+Watch",
+    }
 }
 
 # QR code records: { code_hash -> { product_id, total_scans, first_scan_time, ... } }
@@ -78,7 +90,9 @@ MOCK_SCAN_HISTORY = [
     {"id": 1, "product": "Premium Wireless Headphones", "brand": "SoundTech", "status": "VERIFIED",  "scanned_at": "2025-01-15T10:22:00Z", "code": "VERIFY-prod_001-ALPHA123"},
     {"id": 2, "product": "Organic Green Tea",           "brand": "NatureBrew", "status": "WARNING",   "scanned_at": "2025-01-14T16:05:00Z", "code": "VERIFY-prod_001-BETA456"},
     {"id": 3, "product": "Anti-Aging Face Serum",       "brand": "GlowLab",    "status": "VERIFIED",  "scanned_at": "2025-01-13T09:55:00Z", "code": "VERIFY-prod_003-DELTA000"},
-    {"id": 4, "product": "Unknown Product",             "brand": "N/A",        "status": "INVALID",   "scanned_at": "2025-01-12T18:30:00Z", "code": "FAKE-CODE-XYZ"},
+    {"id": 4, "product": "Unknown Product",             "brand": "N/A",        "status": "INVALID",   "scanned_at": "2025-01-12T18:30:00Z", "code": "FAKE-CODE-XYZ"},    
+    {"id": 5, "product": "Apple Watch",             "brand": "Apple",        "status": "INVALID",   "scanned_at": "2025-01-12T18:30:00Z", "code": "FAKE-CODE-XYZ"},
+
 ]
 
 MOCK_USERS = {
