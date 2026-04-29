@@ -54,7 +54,7 @@ def health_check(request):
         "status": "ok",
         "message": "FakeDetect API is running 🟢",
         "version": "2.0.0",
-        "database": "PostgreSQL"
+        "database": "MySQL"
     })
 
 

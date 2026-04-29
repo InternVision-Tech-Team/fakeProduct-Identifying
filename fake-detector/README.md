@@ -1,32 +1,44 @@
 # FakeDetect – Anti-Counterfeit QR Platform
 
-A full-stack product verification platform using **Django (DRF)** + **React (Vite)** with **PostgreSQL**, fully dockerised.
-Production-ready with persistent data storage and comprehensive database integration.
+A full-stack product verification platform using **Django (DRF)** + **React (Vite)** with **MySQL** for local data storage.
+Production-ready with persistent database storage and easy local development.
 
 ---
 
-## 🚀 Quick Start (Docker)
+## 🚀 Quick Start (Local Development)
 
 ### Prerequisites
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) installed and running.
+- Python 3.14+ and pip
+- Node.js 20+
+- Local MySQL server installed and running
 
-### Run everything with one command
+### Start the application locally
 
 ```bash
-docker compose up --build
+cd backend
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe -m pip install -r requirements.txt
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe manage.py migrate
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe manage.py runserver
+```
+
+In another terminal:
+
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
 **What happens:**
-- PostgreSQL database starts (auto-creates tables via migrations)
-- Django backend initializes with migrations
-- React frontend builds with Vite
-- Everything connected and ready to use
+- Local MySQL database is used for persistent storage
+- Django backend applies migrations and starts on port 8000
+- React frontend runs with Vite on port 5173
 
 | Service  | URL                        | Status |
 |----------|----------------------------|--------|
 | Frontend | http://localhost:5173      | ✅ React |
 | Backend  | http://localhost:8000/api/ | ✅ Django |
-| Database | postgres://localhost:5432 | ✅ PostgreSQL |
+| Database | mysql://localhost:3306     | ✅ MySQL |
 
 > First build takes ~2–3 minutes. Subsequent starts are fast.
 
@@ -45,11 +57,11 @@ docker compose up --build
 ## 🗄️ Database Integration
 
 ### What's New:
-✅ **PostgreSQL** for persistent data storage
-✅ **Auto-migrations** run on startup
+✅ **MySQL** for persistent local data storage
+✅ **Auto-migrations** run locally with Django
 ✅ **8 comprehensive models** with relationships
 ✅ **Indexed queries** for performance
-✅ **Volume persistence** survives restarts
+✅ **Local database persistence** survives restarts
 ✅ **Production-ready** schema
 
 ### Models:
@@ -68,14 +80,12 @@ docker compose up --build
 
 ```
 fake-detector/
-├── docker-compose.yml          # PostgreSQL + Backend + Frontend
 ├── README.md
 ├── backend/
-│   ├── Dockerfile
-│   ├── requirements.txt         # psycopg2 for PostgreSQL
+│   ├── requirements.txt         # mysql-connector-python for MySQL
 │   ├── manage.py
 │   ├── core/
-│   │   ├── settings.py          # PostgreSQL configuration
+│   │   ├── settings.py          # MySQL configuration
 │   │   ├── urls.py
 │   │   └── wsgi.py
 │   ├── api/
@@ -86,7 +96,6 @@ fake-detector/
 │   │   └── migrations/          # Auto-generated DB migrations
 │   └── requirements.txt
 └── frontend/
-    ├── Dockerfile
     ├── package.json
     ├── vite.config.js
     └── src/                     # React + Vite
@@ -129,23 +138,20 @@ fake-detector/
 
 ### Backup Database
 ```bash
-docker compose exec db pg_dump -U postgres fakedetect > backup.sql
+mysqldump -u root -p fakedetect > backup.sql
 ```
 
 ### View Database Stats
 ```bash
-docker compose exec db psql -U postgres -d fakedetect \
-  -c "SELECT COUNT(*) as scan_records FROM scan_records; \
-      SELECT COUNT(*) as products FROM products; \
-      SELECT COUNT(*) as users FROM users;"
+mysql -u root -p -e "SELECT COUNT(*) as scan_records FROM scan_records; SELECT COUNT(*) as products FROM products; SELECT COUNT(*) as users FROM users;" fakedetect
 ```
 
 ### Connect to Database CLI
 ```bash
-docker compose exec db psql -U postgres -d fakedetect
+mysql -u root -p fakedetect
 ```
 
-Then run SQL commands (e.g., `\dt` to list tables, `\q` to exit).
+Then run SQL commands (e.g., `SHOW TABLES;` to list tables, `exit` to close the client).
 
 ---
 
@@ -155,27 +161,25 @@ Then run SQL commands (e.g., `\dt` to list tables, `\q` to exit).
 ```bash
 cd backend
 
-# Create virtual environment
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+# Activate your virtual environment
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe -m pip install -r requirements.txt
 
-# Install dependencies
-pip install -r requirements.txt
+# Install local MySQL server and ensure it is running
+# Configure MySQL credentials for your environment
+set DB_HOST=127.0.0.1
+set DB_NAME=fakedetect
+set DB_USER=root
+set DB_PASSWORD=root
 
-# Set up PostgreSQL (must be running locally)
-export DB_HOST=localhost
-export DB_NAME=fakedetect
-export DB_USER=postgres
-export DB_PASSWORD=postgres
-
-# Run migrations
-python manage.py migrate
+# Create the database and run migrations
+mysql -u root -p -e "CREATE DATABASE IF NOT EXISTS fakedetect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe manage.py migrate
 
 # Create admin user
-python manage.py createsuperuser
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe manage.py createsuperuser
 
 # Start server
-python manage.py runserver
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe manage.py runserver
 ```
 
 ### Frontend
@@ -185,17 +189,14 @@ npm install
 npm run dev
 ```
 
-> For local development, PostgreSQL must be installed and running.
-
 ---
 
 ## 🔐 Database Security
 
-- Change `POSTGRES_PASSWORD` in `docker-compose.yml`
-- Use `django-environ` for production secrets
-- Enable SSL for database connections in production
-- Implement row-level security policies
-- Regular backups of production database
+- Use strong local MySQL passwords and never store secrets in source control
+- Use environment variables for `DB_USER`, `DB_PASSWORD`, `DB_HOST`, `DB_PORT`, and `DB_NAME`
+- Enable TLS for MySQL in production
+- Apply regular backups of your local database
 
 ---
 
@@ -212,7 +213,7 @@ npm run dev
 ✅ Dashboard analytics with charts
 ✅ Scan history tracking
 ✅ Mobile-responsive UI
-✅ PostgreSQL persistence with migrations
+✅ MySQL persistence with migrations
 
 ---
 
@@ -233,22 +234,20 @@ npm run dev
 
 ## 🚨 Troubleshooting
 
-### Database Not Starting
+### Database Connection Issues
 ```bash
-docker compose logs db
-docker compose restart db
+mysql -u root -p -e "SELECT 1;"
 ```
 
 ### Migration Errors
 ```bash
-docker compose exec backend python manage.py migrate api zero
-docker compose exec backend python manage.py migrate
+cd backend
+c:/Users/tanis/Desktop/fake-detector/.venv/Scripts/python.exe manage.py migrate
 ```
 
-### Reset Everything
+### Reset Database
 ```bash
-docker compose down -v  # WARNING: Deletes database
-docker compose up --build
+mysql -u root -p -e "DROP DATABASE IF EXISTS fakedetect; CREATE DATABASE fakedetect CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 ```
 
 ---
@@ -265,9 +264,9 @@ docker compose up --build
 
 **Backend:**
 - Django 4.2 + Django REST Framework
-- PostgreSQL 15 (persistent)
+- MySQL (local development)
 - SimpleJWT authentication
-- psycopg2-binary driver
+- mysql-connector-python driver
 
 **Frontend:**
 - React 18 + Vite
@@ -275,10 +274,10 @@ docker compose up --build
 - Axios + Recharts
 - Tailwind CSS
 
-**DevOps:**
-- Docker + docker-compose
-- Auto-migrations on startup
-- Volume persistence
+**Development:**
+- Local Python virtual environment
+- Local MySQL database
+- Vite development server
 
 ---
 
