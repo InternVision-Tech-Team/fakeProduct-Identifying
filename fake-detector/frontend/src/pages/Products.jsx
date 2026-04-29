@@ -5,10 +5,17 @@ import { Package, Plus, Pencil, Trash2, QrCode, Loader2, X, Save } from 'lucide-
 
 const EMPTY = {
   name: '', brand: '', sku: '', batch_number: '',
-  manufacturing_date: '', expiry_date: '', description: '', category: 'Electronics',
+  manufacturing_date: '', expiry_date: '', description: '', category: 'electronics',
 }
 
-const CATEGORIES = ['Electronics', 'Food & Beverage', 'Cosmetics', 'Pharmaceuticals', 'Clothing', 'General']
+const CATEGORIES = [
+  { value: 'electronics', label: 'Electronics' },
+  { value: 'food_beverage', label: 'Food & Beverage' },
+  { value: 'cosmetics', label: 'Cosmetics' },
+  { value: 'pharmaceuticals', label: 'Pharmaceuticals' },
+  { value: 'clothing', label: 'Clothing' },
+  { value: 'other', label: 'General' },
+]
 
 export default function Products() {
   const [products, setProducts] = useState([])
@@ -18,6 +25,7 @@ export default function Products() {
   const [form, setForm]         = useState(EMPTY)
   const [saving, setSaving]     = useState(false)
   const [deleting, setDeleting] = useState(null)
+  const [error, setError]       = useState('')
 
   const load = () => {
     setLoading(true)
@@ -30,7 +38,9 @@ export default function Products() {
   const openEdit   = (p)  => { setEditing(p.id); setForm({ ...p }); setModal(true) }
 
   const submit = async (e) => {
-    e.preventDefault(); setSaving(true)
+    e.preventDefault();
+    setSaving(true)
+    setError('')
     try {
       if (editing) {
         const { data } = await api.put(`/products/${editing}/`, form)
@@ -38,9 +48,26 @@ export default function Products() {
       } else {
         const { data } = await api.post('/products/', form)
         setProducts(ps => [data, ...ps])
+        setModal(false)
       }
-      setModal(false)
-    } finally { setSaving(false) }
+    } catch (err) {
+      const response = err.response?.data
+      const message = response?.detail ||
+        response?.sku?.[0] ||
+        response?.name?.[0] ||
+        response?.brand?.[0] ||
+        response?.batch_number?.[0] ||
+        response?.manufacturing_date?.[0] ||
+        response?.expiry_date?.[0] ||
+        response?.category?.[0] ||
+        response?.image_url?.[0] ||
+        response?.non_field_errors?.[0] ||
+        err.message ||
+        'Failed to save product. Please check the form and try again.'
+      setError(message)
+    } finally {
+      setSaving(false)
+    }
   }
 
   const remove = async (id) => {
@@ -106,6 +133,11 @@ export default function Products() {
               <button onClick={() => setModal(false)} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
             </div>
             <form onSubmit={submit} className="p-6 space-y-4">
+              {error && (
+                <div className="rounded-lg bg-red-50 border border-red-100 text-red-700 px-4 py-3 text-sm">
+                  {error}
+                </div>
+              )}
               {[
                 { name: 'name',               label: 'Product Name',       placeholder: 'e.g. Premium Headphones' },
                 { name: 'brand',              label: 'Brand',              placeholder: 'e.g. SoundTech' },
@@ -123,7 +155,9 @@ export default function Products() {
               <div>
                 <label className="block text-sm font-medium mb-1">Category</label>
                 <select name="category" value={form.category} onChange={handle} className="input">
-                  {CATEGORIES.map(c => <option key={c}>{c}</option>)}
+                  {CATEGORIES.map((c) => (
+                    <option key={c.value} value={c.value}>{c.label}</option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -132,7 +166,7 @@ export default function Products() {
                   className="input resize-none" rows={3} placeholder="Short product description…" />
               </div>
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setModal(false)} className="btn-secondary flex-1 justify-center">Cancel</button>
+                <button type="button" onClick={() => { setModal(false); setError('') }} className="btn-secondary flex-1 justify-center">Cancel</button>
                 <button type="submit" className="btn-primary flex-1 justify-center" disabled={saving}>
                   {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                   {editing ? 'Save Changes' : 'Add Product'}

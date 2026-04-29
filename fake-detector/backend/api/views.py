@@ -3,6 +3,7 @@ import io
 import base64
 from datetime import datetime, timedelta
 from decimal import Decimal
+from urllib.parse import quote_plus
 
 import qrcode
 from PIL import Image
@@ -166,16 +167,37 @@ def products_list(request):
     
     data = request.data.copy()
     data['brand_user'] = brand_user.id
+
+    # Normalize category label values to backend choice keys
+    category_map = {
+        'Electronics': 'electronics',
+        'Food & Beverage': 'food_beverage',
+        'Cosmetics': 'cosmetics',
+        'Pharmaceuticals': 'pharmaceuticals',
+        'Clothing': 'clothing',
+        'General': 'other',
+        'Other': 'other',
+    }
+    category_value = data.get('category')
+    if category_value:
+        normalized = category_map.get(category_value)
+        if normalized:
+            data['category'] = normalized
+        else:
+            data['category'] = category_value.strip().lower().replace(' ', '_')
     
     # Set default image if not provided
     if not data.get('image_url'):
-        data['image_url'] = f"https://placehold.co/300x300?text={data.get('name', 'Product')}"
+        label = quote_plus(str(data.get('name', 'Product')))
+        data['image_url'] = f"https://placehold.co/300x300?text={label}"
     
     serializer = ProductSerializer(data=data)
     if serializer.is_valid():
         serializer.save(brand_user=brand_user)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
+    print('PRODUCT CREATE DATA:', data)
+    print('PRODUCT CREATE ERRORS:', serializer.errors)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -371,6 +393,22 @@ def scan_history(request):
         })
     
     return Response({"count": len(results), "results": results})
+
+
+@api_view(["GET"])
+def scan_records(request):
+    """List scan records for offline sync"""
+    scans = ScanRecord.objects.select_related('qr_code__product').order_by('-scanned_at')[:100]
+    serializer = ScanRecordSerializer(scans, many=True)
+    return Response({"count": len(serializer.data), "results": serializer.data})
+
+
+@api_view(["GET"])
+def qr_codes_list(request):
+    """List QR codes for offline sync"""
+    qr_codes = QRCode.objects.filter(is_active=True).select_related('product').order_by('-created_at')[:100]
+    serializer = QRCodeSerializer(qr_codes, many=True)
+    return Response({"count": len(serializer.data), "results": serializer.data})
 
 
 # ── Dashboard Analytics ───────────────────────
